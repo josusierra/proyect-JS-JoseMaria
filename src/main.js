@@ -1,6 +1,6 @@
 import { router } from './router.js';
-import { Navbar } from './components/Navbar.js';
-import './styles/style.css';
+import { Navbar } from './components/navbar.js';
+import './styles/style.css'
 
 
 const app = document.querySelector('#app');
