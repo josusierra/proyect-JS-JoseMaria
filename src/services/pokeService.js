@@ -1,7 +1,7 @@
 const BASE = 'https://pokeapi.co/api/v2';
 
 
-export async function fetchPokemons(limit = 20, offset = 0) {
+export async function fetchPokemons(limit = 200, offset = 0) {
     try {
         const res = await fetch(`${BASE}/pokemon?limit=${limit}&offset=${offset}`);
         if (!res.ok) throw new Error('Error fetching list');
