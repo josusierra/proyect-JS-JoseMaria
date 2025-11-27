@@ -1,5 +1,5 @@
 import { fetchPokemons } from "../services/pokeService.js";
-import { isFavorite, toggleFavorite } from "../utils/favorites.js";
+import { isFavorite, toggleFavorite, getFavorites } from "../utils/favorites.js";
 
 let currentPage = 0;
 const pageSize = 9;
@@ -52,51 +52,6 @@ function createCard(pokemon) {
     
 }
 
-async function loadList() {
-    const container = document.getElementById("pokemon-list");
-    const prevBtn = document.getElementById("prev-btn");
-    const nextBtn = document.getElementById("next-btn");
-    const toggleFavBtn = document.getElementById("toggle-fav-btn");
-
-    try {
-        const offset = currentPage * pageSize;
-
-        const data = await fetchPokemons(pageSize, offset);
-
-        container.innerHTML = data.results.map((p) => createCard(p)).join("");
-
-        //fav
-        document.querySelectorAll(".fav-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id = btn.dataset.id;
-    
-                toggleFavorite(id);
-    
-                btn.textContent = isFavorite(id) ? "⭐" : "☆";
-            });
-        });
-
-
-        prevBtn.disabled = currentPage === 0;
-        nextBtn.disabled = data.results.length < pageSize;
-
-        prevBtn.onclick = () => {
-            if (currentPage > 0) {
-                currentPage--;
-                loadList();
-            }
-        };
-
-        nextBtn.onclick = () => {
-            currentPage++;
-            loadList();
-        };
-
-    } catch (err) {
-        container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
-    }
-}
-
 // async function loadList() {
 //     const container = document.getElementById("pokemon-list");
 //     const prevBtn = document.getElementById("prev-btn");
@@ -104,76 +59,36 @@ async function loadList() {
 //     const toggleFavBtn = document.getElementById("toggle-fav-btn");
 
 //     try {
-//         let list = [];
+//         const offset = currentPage * pageSize;
 
-//         if (showingFavorites) {
-//             //fav
-//             const favIds = getFavorites();
-            
-//             if (favIds.length === 0) {
-//                 container.innerHTML = `
-//                     <p class="text-center text-warning fs-5">No tienes favoritos aún.</p>
-//                 `;
-//                 return;
-//             }
+//         const data = await fetchPokemons(pageSize, offset);
 
-//             const promises = favIds.map(id => 
-//                 fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then(r => r.json())
-//             );
-
-//             const favData = await Promise.all(promises);
-
-//             list = favData.map(p => ({
-//                 name: p.name,
-//                 url: `https://pokeapi.co/api/v2/pokemon/${p.id}/`
-//             }));
-
-
-//         } else {
-//             //lista normal
-//             const offset = currentPage * pageSize;
-//             const data = await fetchPokemons(pageSize, offset);
-//             list = data.results;
-
-//         }
-
-//         container.innerHTML = list.map(p => createCard(p)).join("");
+//         container.innerHTML = data.results.map((p) => createCard(p)).join("");
 
 //         //fav
 //         document.querySelectorAll(".fav-btn").forEach(btn => {
 //             btn.addEventListener("click", () => {
 //                 const id = btn.dataset.id;
-
+    
 //                 toggleFavorite(id);
-
+    
 //                 btn.textContent = isFavorite(id) ? "⭐" : "☆";
 //             });
 //         });
 
-//         //paginado
-//         if (!showingFavorites) {
-//             prevBtn.disabled = currentPage === 0;
-//             nextBtn.disabled = list.length < pageSize;
 
-//             prevBtn.onclick = () => {
-//                 if (currentPage > 0) {
-//                     currentPage--;
-//                     loadList();
-//                 }
-//             };
+//         prevBtn.disabled = currentPage === 0;
+//         nextBtn.disabled = data.results.length < pageSize;
 
-//             nextBtn.onclick = () => {
-//                 currentPage++;
+//         prevBtn.onclick = () => {
+//             if (currentPage > 0) {
+//                 currentPage--;
 //                 loadList();
-//             };
-//         }
+//             }
+//         };
 
-//         // botón favoritos
-//         toggleFavBtn.onclick = () => {
-//             showingFavorites = !showingFavorites;
-
-//             toggleFavBtn.textContent = showingFavorites ? "Ver todos" : "⭐solo favoritos";
-
+//         nextBtn.onclick = () => {
+//             currentPage++;
 //             loadList();
 //         };
 
@@ -181,3 +96,88 @@ async function loadList() {
 //         container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
 //     }
 // }
+
+async function loadList() {
+    const container = document.getElementById("pokemon-list");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const toggleFavBtn = document.getElementById("toggle-fav-btn");
+
+    try {
+        let list = [];
+
+        if (showingFavorites) {
+            //fav
+            const favIds = getFavorites();
+            
+            if (favIds.length === 0) {
+                container.innerHTML = `
+                    <p class="text-center text-warning fs-5">No tienes favoritos aún.</p>
+                `;
+                return;
+            }
+
+            const promises = favIds.map(id => 
+                fetch(`https://pokeapi.co/api/v2/pokemon/${id}`).then(r => r.json())
+            );
+
+            const favData = await Promise.all(promises);
+
+            list = favData.map(p => ({
+                name: p.name,
+                url: `https://pokeapi.co/api/v2/pokemon/${p.id}/`
+            }));
+
+
+        } else {
+            //lista normal
+            const offset = currentPage * pageSize;
+            const data = await fetchPokemons(pageSize, offset);
+            list = data.results;
+
+        }
+
+        container.innerHTML = list.map(p => createCard(p)).join("");
+
+        //fav
+        document.querySelectorAll(".fav-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const id = btn.dataset.id;
+
+                toggleFavorite(id);
+
+                btn.textContent = isFavorite(id) ? "⭐" : "☆";
+            });
+        });
+
+        //paginado
+        if (!showingFavorites) {
+            prevBtn.disabled = currentPage === 0;
+            nextBtn.disabled = list.length < pageSize;
+
+            prevBtn.onclick = () => {
+                if (currentPage > 0) {
+                    currentPage--;
+                    loadList();
+                }
+            };
+
+            nextBtn.onclick = () => {
+                currentPage++;
+                loadList();
+            };
+        }
+
+        // botón favoritos
+        toggleFavBtn.onclick = () => {
+            showingFavorites = !showingFavorites;
+
+            toggleFavBtn.textContent = showingFavorites ? "Ver todos" : "⭐solo favoritos";
+
+            loadList();
+        };
+
+    } catch (err) {
+        container.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+    }
+}
