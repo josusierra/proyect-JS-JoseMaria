@@ -32,7 +32,7 @@ async function loadPokemon(id) {
                 <p><strong>Altura:</strong> ${p.height}</p>
                 <p><strong>Peso:</strong> ${p.weight}</p>
 
-                <a class="btn" href="#/list">Volver</a>
+                <a class="btn btn-primary mt-3" href="#/list">Volver</a>
             </article>
         `;
     } catch (error) {
